@@ -5,10 +5,12 @@
 
 # next.js
 /.next/
-#/out/
+/out/
 
 # production
-#/build
+/build
+
+# /docs - commented out to allow docs folder to be committed
 
 # debug
 npm-debug.log*
