@@ -2,8 +2,8 @@
 const nextConfig = {
   output: 'export',
   trailingSlash: true,
-  basePath: process.env.NODE_ENV === 'production' ? '/0826457.github.io-3n' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/0826457.github.io-3n/' : '',
+  basePath: process.env.NODE_ENV === 'production' ? '' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/' : '',
   distDir: 'docs',
   
   eslint: {
