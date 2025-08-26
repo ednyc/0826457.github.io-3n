@@ -131,6 +131,10 @@ const getCaseStudy = (slug: string) => {
   return caseStudies[slug as keyof typeof caseStudies] || null
 }
 
+export async function generateStaticParams() {
+  return [{ slug: "fintech-mvp" }, { slug: "enterprise-saas" }, { slug: "mobile-health" }]
+}
+
 export default function CaseStudyPage({ params }: { params: { slug: string } }) {
   const caseStudy = getCaseStudy(params.slug)
 
