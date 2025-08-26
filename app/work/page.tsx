@@ -1,9 +1,13 @@
+"use client"
+
 import { Navigation } from "@/components/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
 import { ArrowRight, ExternalLink, Calendar, Users, TrendingUp } from "lucide-react"
+import { useState } from "react"
 
 const caseStudies = [
   {
@@ -125,6 +129,16 @@ const caseStudies = [
 const industries = ["All", "FinTech", "SaaS", "HealthTech", "E-commerce", "Logistics", "EdTech"]
 
 export default function WorkPage() {
+  const [activeTab, setActiveTab] = useState("All")
+
+  const filteredCaseStudies =
+    activeTab === "All" ? caseStudies : caseStudies.filter((study) => study.industry === activeTab)
+
+  const filteredFeaturedStudies =
+    activeTab === "All"
+      ? caseStudies.filter((study) => study.featured)
+      : caseStudies.filter((study) => study.featured && study.industry === activeTab)
+
   return (
     <main className="min-h-screen">
       <Navigation />
@@ -142,36 +156,52 @@ export default function WorkPage() {
             </p>
           </div>
 
-          {/* Industry Filter */}
-          <div className="flex flex-wrap justify-center gap-2 mb-12">
-            {industries.map((industry) => (
-              <Badge
-                key={industry}
-                variant={industry === "All" ? "default" : "outline"}
-                className="cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                {industry}
-              </Badge>
-            ))}
+          <div className="flex justify-center mb-12">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl">
+              <TabsList className="grid w-full grid-cols-7 bg-muted/50 p-1 rounded-lg">
+                {industries.map((industry) => (
+                  <TabsTrigger
+                    key={industry}
+                    value={industry}
+                    className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground transition-all duration-200 text-sm font-medium"
+                  >
+                    {industry}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+
+          <div className="text-center mb-8">
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredCaseStudies.length} project{filteredCaseStudies.length !== 1 ? "s" : ""}
+              {activeTab !== "All" && ` in ${activeTab}`}
+            </p>
           </div>
         </div>
       </section>
 
       {/* Featured Case Studies */}
-      <section className="py-20 bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">Featured Projects</h2>
-            <p className="text-xl text-muted-foreground">
-              Our most impactful projects that showcase our expertise across different industries.
-            </p>
-          </div>
+      {filteredFeaturedStudies.length > 0 && (
+        <section className="py-20 bg-card">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
+                Featured Projects
+                {activeTab !== "All" && ` in ${activeTab}`}
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                Our most impactful projects that showcase our expertise
+                {activeTab !== "All" ? ` in ${activeTab.toLowerCase()}` : " across different industries"}.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-            {caseStudies
-              .filter((study) => study.featured)
-              .map((study) => (
-                <Card key={study.id} className="border-border hover:shadow-lg transition-shadow duration-300 group">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+              {filteredFeaturedStudies.map((study) => (
+                <Card
+                  key={study.id}
+                  className="border-border hover:shadow-lg transition-all duration-300 group hover:border-accent/50"
+                >
                   <div className="aspect-video bg-muted overflow-hidden rounded-t-lg">
                     <img
                       src={study.image || "/placeholder.svg"}
@@ -181,8 +211,10 @@ export default function WorkPage() {
                   </div>
                   <CardHeader>
                     <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline">{study.industry}</Badge>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                      <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20">
+                        {study.industry}
+                      </Badge>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
                     </div>
                     <CardTitle className="text-xl font-semibold text-foreground group-hover:text-accent transition-colors">
                       {study.title}
@@ -211,7 +243,10 @@ export default function WorkPage() {
                           </Badge>
                         )}
                       </div>
-                      <Button asChild className="w-full">
+                      <Button
+                        asChild
+                        className="w-full group-hover:bg-accent group-hover:text-accent-foreground transition-colors"
+                      >
                         <Link href={`/work/${study.id}`} className="flex items-center gap-2">
                           View Case Study
                           <ArrowRight className="h-4 w-4" />
@@ -221,81 +256,108 @@ export default function WorkPage() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* All Case Studies */}
       <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">All Projects</h2>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
+              {activeTab === "All" ? "All Projects" : `${activeTab} Projects`}
+            </h2>
             <p className="text-xl text-muted-foreground">
-              Explore our complete portfolio of successful product launches and transformations.
+              {activeTab === "All"
+                ? "Explore our complete portfolio of successful product launches and transformations."
+                : `Discover our ${activeTab.toLowerCase()} expertise and successful implementations.`}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {caseStudies.map((study) => (
-              <Card key={study.id} className="border-border hover:shadow-lg transition-shadow duration-300 group">
-                <div className="md:flex">
-                  <div className="md:w-1/3">
-                    <div className="aspect-square md:aspect-auto md:h-full bg-muted overflow-hidden rounded-l-lg">
-                      <img
-                        src={study.image || "/placeholder.svg"}
-                        alt={study.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+          {filteredCaseStudies.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-muted-foreground mb-4">
+                <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg">No projects found in {activeTab}</p>
+                <p className="text-sm">Try selecting a different industry or view all projects.</p>
+              </div>
+              <Button variant="outline" onClick={() => setActiveTab("All")} className="mt-4">
+                View All Projects
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {filteredCaseStudies.map((study) => (
+                <Card
+                  key={study.id}
+                  className="border-border hover:shadow-lg transition-all duration-300 group hover:border-accent/50"
+                >
+                  <div className="md:flex">
+                    <div className="md:w-1/3">
+                      <div className="aspect-square md:aspect-auto md:h-full bg-muted overflow-hidden rounded-l-lg">
+                        <img
+                          src={study.image || "/placeholder.svg"}
+                          alt={study.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    </div>
+                    <div className="md:w-2/3">
+                      <CardHeader>
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20">
+                            {study.industry}
+                          </Badge>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {study.timeline}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              {study.teamSize}
+                            </div>
+                          </div>
+                        </div>
+                        <CardTitle className="text-lg font-semibold text-foreground group-hover:text-accent transition-colors">
+                          {study.title}
+                        </CardTitle>
+                        <CardDescription className="text-sm text-muted-foreground line-clamp-2">
+                          {study.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="h-4 w-4 text-accent" />
+                            <span className="font-semibold text-accent text-sm">{study.outcome}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {study.technologies.slice(0, 4).map((tech, techIndex) => (
+                              <Badge key={techIndex} variant="secondary" className="text-xs">
+                                {tech}
+                              </Badge>
+                            ))}
+                          </div>
+                          <Button
+                            asChild
+                            size="sm"
+                            className="w-full group-hover:bg-accent group-hover:text-accent-foreground transition-colors"
+                          >
+                            <Link href={`/work/${study.id}`} className="flex items-center gap-2">
+                              View Details
+                              <ArrowRight className="h-3 w-3" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
                     </div>
                   </div>
-                  <div className="md:w-2/3">
-                    <CardHeader>
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="outline">{study.industry}</Badge>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {study.timeline}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {study.teamSize}
-                          </div>
-                        </div>
-                      </div>
-                      <CardTitle className="text-lg font-semibold text-foreground group-hover:text-accent transition-colors">
-                        {study.title}
-                      </CardTitle>
-                      <CardDescription className="text-sm text-muted-foreground line-clamp-2">
-                        {study.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="h-4 w-4 text-accent" />
-                          <span className="font-semibold text-accent text-sm">{study.outcome}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {study.technologies.slice(0, 4).map((tech, techIndex) => (
-                            <Badge key={techIndex} variant="secondary" className="text-xs">
-                              {tech}
-                            </Badge>
-                          ))}
-                        </div>
-                        <Button asChild size="sm" className="w-full">
-                          <Link href={`/work/${study.id}`} className="flex items-center gap-2">
-                            View Details
-                            <ArrowRight className="h-3 w-3" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

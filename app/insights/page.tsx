@@ -1,9 +1,13 @@
+"use client"
+
 import { Navigation } from "@/components/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
 import { ArrowRight, Calendar, Clock, User } from "lucide-react"
+import { useState } from "react"
 
 const articles = [
   {
@@ -104,6 +108,13 @@ const whitepapers = [
 ]
 
 export default function InsightsPage() {
+  const [activeCategory, setActiveCategory] = useState("All")
+
+  const filteredArticles = articles.filter((article) => activeCategory === "All" || article.category === activeCategory)
+
+  const featuredArticles = filteredArticles.filter((article) => article.featured)
+  const allArticles = filteredArticles
+
   return (
     <main className="min-h-screen">
       <Navigation />
@@ -121,32 +132,36 @@ export default function InsightsPage() {
           </div>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-2 mb-12">
-            {categories.map((category) => (
-              <Badge
-                key={category}
-                variant={category === "All" ? "default" : "outline"}
-                className="cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                {category}
-              </Badge>
-            ))}
-          </div>
+          <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
+            <TabsList className="grid w-full grid-cols-5 max-w-2xl mx-auto">
+              {categories.map((category) => (
+                <TabsTrigger
+                  key={category}
+                  value={category}
+                  className="text-sm font-medium transition-all duration-200 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground"
+                >
+                  {category}
+                  <span className="ml-1 text-xs opacity-70">
+                    ({category === "All" ? articles.length : articles.filter((a) => a.category === category).length})
+                  </span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </div>
       </section>
 
       {/* Featured Articles */}
-      <section className="py-20 bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">Featured Articles</h2>
-            <p className="text-xl text-muted-foreground">Our most popular and impactful content.</p>
-          </div>
+      {featuredArticles.length > 0 && (
+        <section className="py-20 bg-card">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">Featured Articles</h2>
+              <p className="text-xl text-muted-foreground">Our most popular and impactful content.</p>
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-            {articles
-              .filter((article) => article.featured)
-              .map((article) => (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+              {featuredArticles.map((article) => (
                 <Card key={article.id} className="border-border hover:shadow-lg transition-shadow duration-300 group">
                   <div className="aspect-video bg-muted overflow-hidden rounded-t-lg">
                     <img
@@ -186,57 +201,78 @@ export default function InsightsPage() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* All Articles */}
       <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">Latest Articles</h2>
-            <p className="text-xl text-muted-foreground">Stay updated with the latest trends and best practices.</p>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
+              {activeCategory === "All" ? "Latest Articles" : `${activeCategory} Articles`}
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              {allArticles.length} article{allArticles.length !== 1 ? "s" : ""}
+              {activeCategory !== "All" && ` in ${activeCategory}`}
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {articles.map((article) => (
-              <Card key={article.id} className="border-border hover:shadow-lg transition-shadow duration-300 group">
-                <div className="aspect-video bg-muted overflow-hidden rounded-t-lg">
-                  <img
-                    src={article.image || "/placeholder.svg"}
-                    alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">{article.category}</Badge>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {article.readTime}
+          {/* Empty State */}
+          {allArticles.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <h3 className="text-xl font-semibold text-foreground mb-2">No articles found</h3>
+                <p className="text-muted-foreground mb-6">
+                  No articles match the selected category. Try selecting a different category.
+                </p>
+                <Button onClick={() => setActiveCategory("All")} variant="outline">
+                  View All Articles
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {allArticles.map((article) => (
+                <Card key={article.id} className="border-border hover:shadow-lg transition-shadow duration-300 group">
+                  <div className="aspect-video bg-muted overflow-hidden rounded-t-lg">
+                    <img
+                      src={article.image || "/placeholder.svg"}
+                      alt={article.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="outline">{article.category}</Badge>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {article.readTime}
+                      </div>
                     </div>
-                  </div>
-                  <CardTitle className="text-lg font-semibold text-foreground group-hover:text-accent transition-colors line-clamp-2">
-                    {article.title}
-                  </CardTitle>
-                  <CardDescription className="text-sm text-muted-foreground line-clamp-3">
-                    {article.excerpt}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground">{article.publishDate}</div>
-                    <Button asChild size="sm" variant="ghost">
-                      <Link href={`/insights/${article.id}`} className="flex items-center gap-1">
-                        Read
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <CardTitle className="text-lg font-semibold text-foreground group-hover:text-accent transition-colors line-clamp-2">
+                      {article.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm text-muted-foreground line-clamp-3">
+                      {article.excerpt}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-muted-foreground">{article.publishDate}</div>
+                      <Button asChild size="sm" variant="ghost">
+                        <Link href={`/insights/${article.id}`} className="flex items-center gap-1">
+                          Read
+                          <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
