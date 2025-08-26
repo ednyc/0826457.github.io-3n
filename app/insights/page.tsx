@@ -19,7 +19,7 @@ const articles = [
     readTime: "8 min read",
     publishDate: "Dec 15, 2024",
     author: "Alex Chen",
-    image: "/blog-mvp-guide.png",
+    image: "/mvp-development-guide-illustration-with-startup-pl.png",
     featured: true,
   },
   {
@@ -31,7 +31,7 @@ const articles = [
     readTime: "6 min read",
     publishDate: "Dec 10, 2024",
     author: "Sarah Rodriguez",
-    image: "/blog-ai-trends.png",
+    image: "/ai-and-machine-learning-technology-trends-with-neu.png",
     featured: true,
   },
   {
@@ -43,7 +43,7 @@ const articles = [
     readTime: "10 min read",
     publishDate: "Dec 5, 2024",
     author: "Emily Park",
-    image: "/blog-scaling-teams.png",
+    image: "/development-team-scaling-with-organizational-growt.png",
     featured: false,
   },
   {
@@ -55,7 +55,7 @@ const articles = [
     readTime: "7 min read",
     publishDate: "Nov 28, 2024",
     author: "Michael Thompson",
-    image: "/blog-ux-principles.png",
+    image: "/ux-design-principles-with-user-interface-wireframe.png",
     featured: false,
   },
   {
@@ -67,7 +67,7 @@ const articles = [
     readTime: "12 min read",
     publishDate: "Nov 20, 2024",
     author: "Sarah Rodriguez",
-    image: "/blog-tech-stack.png",
+    image: "/technology-stack-selection-with-programming-langua.png",
     featured: false,
   },
   {
@@ -79,7 +79,7 @@ const articles = [
     readTime: "9 min read",
     publishDate: "Nov 15, 2024",
     author: "Alex Chen",
-    image: "/blog-product-market-fit.png",
+    image: "/product-market-fit-analysis-with-data-charts-and-c.png",
     featured: false,
   },
 ]
