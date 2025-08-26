@@ -8,9 +8,14 @@ type Theme = "dark" | "light"
 interface ThemeContextType {
   theme: Theme
   setTheme: (theme: Theme) => void
+  mounted: boolean
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+const ThemeContext = createContext<ThemeContextType>({
+  theme: "dark",
+  setTheme: () => {},
+  mounted: false,
+})
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark")
@@ -32,12 +37,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [theme, mounted])
 
-  if (!mounted) {
-    return <div className="dark">{children}</div>
-  }
-
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, mounted }}>
       <div className={theme}>{children}</div>
     </ThemeContext.Provider>
   )
@@ -45,8 +46,5 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 export function useTheme() {
   const context = useContext(ThemeContext)
-  if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider")
-  }
   return context
 }
